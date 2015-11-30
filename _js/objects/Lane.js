@@ -1,20 +1,20 @@
 'use strict';
-class Lane extends Phaser.Graphics {
+class Lane extends Phaser.TileSprite {
 
-  constructor(game, x, y) {
-    super(game, x, y);
+  constructor(game, x, y, target) {
+    super(game, x, y, 800, 40, 'lane-mask');
+    this.tileScale.x = 0.5;
+    this.tileScale.y = 0.5;
+    this.anchor.y = 0.5;
+    this.anchor.x = 0;
+    this.target = target;
+    this.autoScroll(200,0);
 
-    this.angle = 50;
-    this.beginFill(0xffffff, 0.1);
-    this.drawRect(0, 0, 600, 40);
+  }
 
-
-
-    let mask = new Phaser.Sprite(this.game, 0, 0, 'lane-mask');
-    mask.scale.setTo(0.5, 0.5);
-    this.addChild(mask);
-
-
+  update() {
+    this.rotation = Phaser.Math.angleBetweenPoints(this.worldPosition, this.target.worldPosition);
+    this.width = Phaser.Math.distance(this.worldPosition.x, this.worldPosition.y, this.target.worldPosition.x, this.target.worldPosition.y);
   }
 
 

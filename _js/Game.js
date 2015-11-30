@@ -8,7 +8,6 @@ class Game extends Phaser.Game {
     this.state.add('GameState', GameState, false);
     this.state.start('GameState');
     this.socket = socket;
-
   }
 
 
