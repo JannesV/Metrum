@@ -7,7 +7,6 @@ var board = new five.Board();
 
 module.exports.register = (server, options, next) => {
   let io = require('socket.io')(server.listener);
-  let init = false;
 
   console.log('johnny-five Plugin INIT');
 
@@ -38,18 +37,35 @@ module.exports.register = (server, options, next) => {
       for (var i = 0; i < buttons.length; i++) {
         let led = leds[i];
         let name = names[i];
+        led.on();
         buttons[i].on('down', () => {
           console.log(name, 'down');
           socket.emit(`${name}Down`);
-          led.on();
+          led.blink(40);
 
         });
         buttons[i].on('up', () => {
           console.log(name, 'up');
           socket.emit(`${name}Up`);
-          led.off();
+          led.stop();
+          led.on();
         });
       }
+
+      socket.on('hit', () => {
+        console.log('HIT');
+        leds.forEach((led) => {
+          led.blink(50);
+        });
+
+        board.wait(750, () => {
+          leds.forEach((led) => {
+            led.stop();
+            led.on();
+          });
+        });
+
+      }),
 
       socket.on('buttonDown', () => {
         console.log('CLICKED');
@@ -72,13 +88,13 @@ module.exports.register = (server, options, next) => {
         startLed.stop();
         headLed.stop();
 
-        leftHandLed.off();
-        leftFootLed.off();
-        rightFootLed.off();
-        rightHandLed.off();
-        stopLed.off();
-        startLed.off();
-        headLed.off();
+        leftHandLed.on();
+        leftFootLed.on();
+        rightFootLed.on();
+        rightHandLed.on();
+        stopLed.on();
+        startLed.on();
+        headLed.on();
 
       });
     });
