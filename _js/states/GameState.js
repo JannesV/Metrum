@@ -8,13 +8,9 @@ let _ = require('lodash');
 class GameState extends Phaser.State {
 
   create() {
-    this.points = {
-      'x': [87, 179.5, 446.5],
-      'y': [78, 367, 173]
-    };
-    this.path = [];
-    this.mode = 1;
     this.scale.fullScreenScaleMode = Phaser.ScaleManager.SHOW_ALL;
+
+    // ***************************** Scene setup ******************************
 
     this.bg = this.add.sprite(0, 0, 'bg');
     this.bg.scale.setTo(0.5, 0.5);
@@ -23,41 +19,50 @@ class GameState extends Phaser.State {
     this.add.existing(new Spotlight(this.game, 0, 530, -30, Spotlight.RIGHT));
     this.add.existing(new Spotlight(this.game, 0, 530, -10, Spotlight.RIGHT));
 
-    this.graphics = this.add.graphics(0, 0);
-    this.graphics.moveTo(this.points.x[0], this.points.y[0]);
-    this.graphics.lineStyle(15, 0xffd900);
+    this.leftArmTargets = [];
+    this.rightArmTargets = [];
+    this.targets = [this.leftArmTargets, this.rightArmTargets];
+    this.ballTimeMin = 1500;
+    this.ballTimeMax = 2500;
+    this.nextEvent = 2000;
 
-    //Metrum Shadow
+    // **************************** Metrum Shadow *****************************
+
     this.metrumShadow = this.add.graphics(this.game.width/2 - 5, 720);
     this.metrumShadow.beginFill(0x000000, 0.2);
     this.metrumShadow.drawEllipse(0, 0, 80, 20);
 
-    //Main Metrum Group
+    // ************************** Main Metrum Group ***************************
+
     this.metrum = this.game.add.group();
     this.metrum.x = this.game.width/2;
     this.metrum.y = this.game.height/2 + 150;
 
-    //Torso
+    // ******************************** Torso *********************************
+
     this.torso = this.add.sprite(0, 0, 'torso');
     this.torso.anchor.set(0.5);
     this.torso.scale.setTo(0.4, 0.4);
     this.metrum.add(this.torso);
 
-    //Left Leg
+    // ******************************* Left Leg *******************************
+
     this.leftLeg = this.add.sprite(this.torso.x - 40, this.torso.y + 60, 'left-leg');
     this.leftLeg.scale.setTo(0.4, 0.4);
     this.leftLeg.anchor.x = 0.4;
     this.leftLeg.anchor.y = 0.1;
     this.metrum.add(this.leftLeg);
 
-    //Right Leg
+    // ****************************** Right Leg *******************************
+
     this.rightLeg = this.add.sprite(this.torso.x + 30, this.torso.y + 60, 'right-leg');
     this.rightLeg.scale.setTo(0.4, 0.4);
     this.rightLeg.anchor.x = 0.4;
     this.rightLeg.anchor.y = 0.1;
     this.metrum.add(this.rightLeg);
 
-    //Left Arm
+    // ******************************* Left Arm *******************************
+
     this.leftArm = this.add.sprite(-35, -15, 'left-arm');
     this.leftArm.scale.setTo(0.4, 0.4);
     this.leftArmGroup = this.game.add.group(this.metrum);
@@ -70,7 +75,8 @@ class GameState extends Phaser.State {
     this.metrum.add(this.leftArmGroup);
     this.metrum.sendToBack(this.leftArmGroup);
 
-    //Left Arm
+    // ******************************* Left Arm *******************************
+
     this.rightArm = this.add.sprite(-8, -20, 'right-arm');
     this.rightArm.scale.setTo(0.4, 0.4);
     this.rightArmGroup = this.game.add.group(this.metrum);
@@ -82,7 +88,8 @@ class GameState extends Phaser.State {
     this.metrum.add(this.rightArmGroup);
     this.metrum.sendToBack(this.rightArmGroup);
 
-    //Head
+    // ********************************* Head *********************************
+
     this.head = this.add.sprite(this.torso.x, this.torso.y - 75, 'head');
     this.head.scale.setTo(0.4, 0.4);
     this.head.anchor.x = 0.5;
@@ -90,23 +97,28 @@ class GameState extends Phaser.State {
     this.metrum.add(this.head);
     this.metrum.sendToBack(this.head);
 
-    this.leftArmLane = new Lane(this.game, -610, 110, this.leftArmTarget);
-    this.leftArmLane.alpha = 0.3;
+    // ******************************** Lanes *********************************
+
+    this.leftArmLane = new Lane(this.game, -13, 112, 'left', true, this.leftArmGroup);
     this.leftArmGroup.add(this.leftArmLane);
-    this.leftArmGroup.sendToBack(this.leftArmLane);
 
-    this.rightHandLane = new Lane(this.game, 10, 100, this.rightArmTarget);
-    this.rightHandLane.alpha = 0.3;
-    this.rightArmGroup.add(this.rightHandLane);
-    this.rightArmGroup.sendToBack(this.rightHandLane);
+    this.rightArmLane = new Lane(this.game, 13, 95, 'right', true, this.leftArmGroup);
+    this.rightArmGroup.add(this.rightArmLane);
 
-    let leftArmTimer = this.game.time.create(false);
-    leftArmTimer.loop(2000, this.addBall, this);
-    leftArmTimer.start();
-    this.leftArmTargets = [];
 
-    this.leftArmTween = this.add.tween(this.leftArmGroup).to({angle: 30}, 1500, Phaser.Easing.Linear.None, true, -1, false, true);
-    this.rightArmTween = this.add.tween(this.rightArmGroup).to({angle: -30}, 1500, Phaser.Easing.Linear.None, true, -1, false, true);
+    // let leftArmTimer = this.game.time.create(false);
+    // leftArmTimer.loop(2000, this.addBall, this);
+    // leftArmTimer.start();
+
+    this.lanes = [this.leftArmLane, this.rightArmLane];
+
+
+    // ******************************** Tweens ********************************
+
+    this.leftArmTween = this.add.tween(this.leftArmGroup).to({angle: 30}, 1500, Phaser.Easing.Bounce.InOut, true, -1, false, true);
+    this.rightArmTween = this.add.tween(this.rightArmGroup).to({angle: -30}, 1500, Phaser.Easing.Bounce.InOut, true, -1, false, true);
+
+    // *************************** Input listeners ****************************
 
     this.input.onDown.add(this.onDown, this);
     this.input.onUp.add(this.onUp, this);
@@ -114,15 +126,10 @@ class GameState extends Phaser.State {
     this.fullScreenButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     this.fullScreenButton.onDown.add(this.fullscreen, this);
 
+    // ************************* Socket.io Listeners **************************
+
     this.game.socket.on('leftHandDown', () => {
-      this.leftArmTarget.down();
-      this.leftArmTargets.forEach((ball) => {
-        if (Phaser.Math.distance(this.leftArmTarget.worldPosition.x, this.leftArmTarget.worldPosition.y, ball.worldPosition.x, ball.worldPosition.y) <= 20) {
-          ball.hit();
-          this.game.socket.emit('hit');
-          console.log('HIT')
-        }
-      });
+      this.checkHit(this.leftArmTarget, this.leftArmTargets);
     });
 
     this.game.socket.on('leftHandUp', () => {
@@ -130,7 +137,7 @@ class GameState extends Phaser.State {
     });
 
     this.game.socket.on('rightHandDown', () => {
-      this.rightArmTarget.down();
+      this.checkHit(this.rightArmTarget, this.rightArmTargets);
     });
 
     this.game.socket.on('rightHandUp', () => {
@@ -140,17 +147,26 @@ class GameState extends Phaser.State {
   }
 
   addBall() {
-    let ball = new Target(this.game, -500, 108);
+    this.nextEvent = this.game.time.now + (this.game.rnd.realInRange(this.ballTimeMin, this.ballTimeMax));
+
+    let rnd = this.game.rnd.integerInRange(0,1)
+    let lane = this.lanes[rnd];
+    let targets = this.targets[rnd];
+
+    let ball = new Target(this.game, -500, lane.y - 5);
     ball.down();
-    let tween = this.add.tween(ball).to({x: -14}, 2500, Phaser.Easing.Linear.None, true, 1);
+    let tween = this.add.tween(ball).to({x: lane.x}, 2500, Phaser.Easing.Linear.None, true, 1);
     tween.onComplete.add((target) => {
       target.poof().then(() => {
-        _.pull(this.leftArmTargets, target);
-      })
+        _.pull(targets, target);
+      });
 
     }, this);
-    this.leftArmGroup.add(ball);
-    this.leftArmTargets.push(ball);
+    lane.add(ball);
+    targets.push(ball);
+
+    console.log(this.targets)
+
   }
 
   fullscreen() {
@@ -171,15 +187,45 @@ class GameState extends Phaser.State {
   }
 
   update() {
-    // this.leftArmTargets.forEach((ball) => {
-    //   if (Phaser.Math.distance(this.leftArmTarget.worldPosition.x, this.leftArmTarget.worldPosition.y, ball.worldPosition.x, ball.worldPosition.y) <= 20) {
-    //     ball.hit();
-    //     console.log('HIT')
-    //   }
-    // });
+    this.checkOver(this.leftArmTarget, this.leftArmTargets, 'leftHandOver');
+    this.checkOver(this.rightArmTarget, this.rightArmTargets, 'rightHandOver');
 
-
+    if (this.game.time.now > this.nextEvent) {
+      console.log('addball');
+      this.addBall();
+    }
   }
+
+  checkOver(target, balls, emit) {
+    let over = false;
+    balls.forEach((ball) => {
+      if (Phaser.Math.distance(target.worldPosition.x, target.worldPosition.y, ball.worldPosition.x, ball.worldPosition.y) <= 20) {
+        over = true;
+      }
+    });
+
+    if (over) {
+      this.game.socket.emit(emit);
+    }
+  }
+
+  checkHit(target, balls) {
+    let hit = false;
+    balls.forEach((ball) => {
+      if (Phaser.Math.distance(target.worldPosition.x, target.worldPosition.y, ball.worldPosition.x, ball.worldPosition.y) <= 20) {
+        hit = true;
+        ball.hit();
+      }
+    });
+
+    if (hit) {
+      this.game.socket.emit('hit');
+    } else {
+      this.game.socket.emit('miss');
+    }
+  }
+
+
 
   preload() {
     this.load.image('left-arm', 'assets/left-arm.png');

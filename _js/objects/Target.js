@@ -31,8 +31,8 @@ class Target extends Phaser.Graphics {
   }
 
   poof() {
-    return new Promise((resolve, reject) => {
-      this.game.time.events.add(250, () => {
+    return new Promise((resolve) => {
+      this.game.time.events.add(750, () => {
         this.kill();
         resolve();
       }, this);

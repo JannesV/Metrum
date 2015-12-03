@@ -27,6 +27,8 @@ module.exports.register = (server, options, next) => {
     let stopLed = new five.Led(6);
     let startLed = new five.Led('A0');
     let headLed = new five.Led('A1');
+
+    let ballOver = false;
     io.on('connection', socket => {
 
 
@@ -37,71 +39,101 @@ module.exports.register = (server, options, next) => {
       for (var i = 0; i < buttons.length; i++) {
         let led = leds[i];
         let name = names[i];
-        led.on();
+        led.off();
         buttons[i].on('down', () => {
           console.log(name, 'down');
           socket.emit(`${name}Down`);
-          led.blink(40);
+          led.on();
 
         });
         buttons[i].on('up', () => {
           console.log(name, 'up');
           socket.emit(`${name}Up`);
           led.stop();
-          led.on();
+          led.off();
         });
       }
 
-      socket.on('hit', () => {
-        console.log('HIT');
-        leds.forEach((led) => {
-          led.blink(50);
+      socket.on('miss', () => {
+        stopLed.blink(25);
+        board.wait(450, () => {
+          stopLed.stop();
+          stopLed.off();
         });
+      });
 
-        board.wait(750, () => {
-          leds.forEach((led) => {
-            led.stop();
-            led.on();
+      socket.on('hit', () => {
+
+        headLed.blink(75);
+        startLed.blink(75);
+        stopLed.blink(75);
+        board.wait(150, () => {
+          headLed.stop();
+          headLed.off();
+          startLed.stop();
+          startLed.off();
+          stopLed.stop();
+          stopLed.off();
+          leftHandLed.blink(75);
+          rightHandLed.blink(75);
+          board.wait(150, () => {
+            leftHandLed.stop();
+            leftHandLed.off();
+            rightHandLed.stop();
+            rightHandLed.off();
+            leftFootLed.blink(75);
+            rightFootLed.blink(75);
+            board.wait(150, () => {
+              leftFootLed.stop();
+              leftFootLed.off();
+              rightFootLed.stop();
+              rightFootLed.off();
+            });
           });
         });
-
-      }),
+      });
 
       socket.on('buttonDown', () => {
         console.log('CLICKED');
-        leftHandLed.blink(50);
-        leftFootLed.blink(50);
-        rightFootLed.blink(50);
-        rightHandLed.blink(50);
-        stopLed.blink(50);
-        startLed.blink(50);
-        headLed.blink(50);
+        leds.forEach((led) => {
+          led.blink(50);
+        });
       });
 
       socket.on('buttonUp', () => {
-        console.log('CLICKED');
-        leftHandLed.stop();
-        leftFootLed.stop();
-        rightFootLed.stop();
-        rightHandLed.stop();
-        stopLed.stop();
-        startLed.stop();
-        headLed.stop();
-
-        leftHandLed.on();
-        leftFootLed.on();
-        rightFootLed.on();
-        rightHandLed.on();
-        stopLed.on();
-        startLed.on();
-        headLed.on();
-
+        leds.forEach((led) => {
+          led.stop();
+          led.off();
+        });
       });
+
+      socket.on('leftHandOver', () => {
+        ballOverCheck('leftHandOver', leftHandLed);
+      });
+
+      socket.on('rightHandOver', () => {
+        ballOverCheck('rightHandOver', rightHandLed);
+      });
+
     });
-    // Create a standard `led` component
-    // on a valid pwm pin
+
+
+    const ballOverCheck = (emit, target) => {
+      if(!ballOver) {
+        console.log(emit);
+        target.on();
+        ballOver = true;
+        board.wait(850, () => {
+          target.off();
+          ballOver = false;
+        });
+      }
+    };
 
   });
+
+
+
   next();
 
 };
