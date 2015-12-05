@@ -123,8 +123,7 @@ class GameState extends Phaser.State {
     this.input.onDown.add(this.onDown, this);
     this.input.onUp.add(this.onUp, this);
 
-    this.fullScreenButton = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    this.fullScreenButton.onDown.add(this.fullscreen, this);
+
 
     // ************************* Socket.io Listeners **************************
 
@@ -149,7 +148,7 @@ class GameState extends Phaser.State {
   addBall() {
     this.nextEvent = this.game.time.now + (this.game.rnd.realInRange(this.ballTimeMin, this.ballTimeMax));
 
-    let rnd = this.game.rnd.integerInRange(0,1)
+    let rnd = this.game.rnd.integerInRange(0, 1);
     let lane = this.lanes[rnd];
     let targets = this.targets[rnd];
 
@@ -165,18 +164,11 @@ class GameState extends Phaser.State {
     lane.add(ball);
     targets.push(ball);
 
-    console.log(this.targets)
+    console.log(this.targets);
 
   }
 
-  fullscreen() {
-    console.log('fullscreen');
-    if (this.game.scale.isFullScreen) {
-      this.game.scale.stopFullScreen();
-    } else {
-      this.game.scale.startFullScreen(false);
-    }
-  }
+
 
   onDown() {
     this.game.socket.emit('buttonDown');

@@ -13,7 +13,8 @@ let socket;
 
 const init = () => {
   socket = io('http://localhost:3000');
-  new Game(socket);
+  let game = new Game(1024, 768, Phaser.AUTO, socket);
+
 };
 
 init();
