@@ -191,7 +191,11 @@
     "no-negated-condition": 2
   },
   "globals": {
-    "Phaser":true,
+    "project":true,
+    "Path":true,
+    "Layer":true,
+    "Point":true,
+    "createjs":true,
     "io":true
   }
 

@@ -65,13 +65,11 @@ body {
   font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
 }
 
-main {
-  margin: 0 auto;
-  padding-top: 30px;
-  width: 960px;
-  font-size: 1.8em;
+canvas {
+  width: 1024px;
+  height: 768px;
 }
 
-h1 {
-  font-size: 1.3em;
+#preload {
+  display: none;
 }

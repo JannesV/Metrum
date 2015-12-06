@@ -12,13 +12,13 @@ module.exports.register = (server, options, next) => {
 
   board.on('ready', () => {
 
-    let leftFootButton = new five.Button(7);
-    let leftHandButton = new five.Button(8);
-    let startButton = new five.Button(9);
-    let headButton = new five.Button(10);
-    let stopButton = new five.Button(11);
-    let rightHandButton = new five.Button(12);
-    let rightFootButton = new five.Button(13);
+    let leftFootButton = new five.Button({pin: 7, holdtime: 250});
+    let leftHandButton = new five.Button({pin: 8, holdtime: 250});
+    let startButton = new five.Button({pin: 9, holdtime: 250});
+    let headButton = new five.Button({pin: 10, holdtime: 250});
+    let stopButton = new five.Button({pin: 11, holdtime: 250});
+    let rightHandButton = new five.Button({pin: 12, holdtime: 250});
+    let rightFootButton = new five.Button({pin: 13, holdtime: 250});
 
     let leftHandLed = new five.Led(2);
     let leftFootLed = new five.Led(3);
@@ -44,13 +44,17 @@ module.exports.register = (server, options, next) => {
           console.log(name, 'down');
           socket.emit(`${name}Down`);
           led.on();
-
         });
         buttons[i].on('up', () => {
           console.log(name, 'up');
           socket.emit(`${name}Up`);
           led.stop();
           led.off();
+        });
+        buttons[i].on('hold', () => {
+          console.log(name, 'hold');
+          socket.emit(`${name}Hold`);
+          led.on();
         });
       }
 
