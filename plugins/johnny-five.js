@@ -119,6 +119,14 @@ module.exports.register = (server, options, next) => {
         ballOverCheck('rightHandOver', rightHandLed);
       });
 
+      socket.on('leftFootOver', () => {
+        ballOverCheck('leftFootOver', leftFootLed);
+      });
+
+      socket.on('rightFootOver', () => {
+        ballOverCheck('rightFootOver', rightFootLed);
+      });
+
     });
 
 

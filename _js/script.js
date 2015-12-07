@@ -19,13 +19,12 @@ const fullScreen = () => {
 
   if(el.webkitRequestFullScreen) {
     el.webkitRequestFullScreen();
-  }
-  else {
+  } else {
     el.mozRequestFullScreen();
   }
-}
+};
 
 window.onload = function() {
   init();
-}
+};
 

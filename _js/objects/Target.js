@@ -1,65 +1,35 @@
 'use strict';
 let paper = require('paper');
 
-// class Target extends paper.Path {
-
-//   constructor(x, y) {
-//     super();
-
-//     Path.Circle(new Point(x, y), 50);
-//     this.fillColor = 'black';
-
-
-//     //this.up();
-//   }
-
-//   // down() {
-//   //   this.clear();
-//   //   this.beginFill(0xffffff, 1);
-//   //   this.lineStyle(5, 0xc17b27, 0.8);
-//   //   this.drawCircle(0, 0, this.radius);
-//   // }
-
-//   // up() {
-//   //   this.clear();
-//   //   this.beginFill(0xffffff, 0.1);
-//   //   this.lineStyle(5, 0xc17b27, 0.8);
-//   //   this.drawCircle(0, 0, this.radius);
-//   // }
-
-//   // over() {
-//   //   this.clear();
-//   //   this.beginFill(0xff0000, 1);
-//   //   this.lineStyle(5, 0xc17b27, 0.8);
-//   //   this.drawCircle(0, 0, this.radius);
-//   // }
-
-//   // poof() {
-//   //   return new Promise((resolve) => {
-//   //     this.game.time.events.add(750, () => {
-//   //       this.kill();
-//   //       resolve();
-//   //     }, this);
-//   //   });
-//   // }
-
-//   // hit () {
-//   //   this.clear();
-//   //   this.beginFill(0x00FF00, 1);
-//   //   this.lineStyle(5, 0xc17b27, 0.8);
-//   //   this.drawCircle(0, 0, this.radius);
-//   // }
-
-
-
-// }
-
-const TargetFactory = (x, y) => {
+const TargetFactory = (x, y, targetX, targetY, targetName, socket) => {
   let target = new paper.Path.Circle(new Point(x, y), 20);
-  target.fillColor = 'black';
+  target.fillColor = '#fcd381';
+  target.targetName = targetName;
+  target.over = false;
+
+  target.startMoving = () => {
+    createjs.Tween.get(target.position).to({x: targetX, y: targetY}, 2000, createjs.Ease.cubicIn).call(target.handleComplete);
+  };
+
+  target.handleComplete = () => {
+    target.over = true;
+    socket.emit(`${target.targetName}Over`);
+    target.fillColor = '#f6a530';
+    createjs.Tween.get(target, {override: true}).wait(750).to({opacity: 0}, 150).call(target.kill);
+  };
+
+  target.hit = () => {
+    createjs.Tween.get(target.scaling).to({x: 3, y: 3}, 200, createjs.Ease.bounceOut).to({x: 0, y: 0}, 200).call(target.kill);
+  };
+
+  target.kill = () => {
+    target.emit('kill');
+
+    target.remove();
+  };
 
   return target;
-}
+};
 
 
 export default TargetFactory;
