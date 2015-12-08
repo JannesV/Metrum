@@ -24,7 +24,6 @@ const TargetFactory = (x, y, targetX, targetY, targetName, socket) => {
 
   target.kill = () => {
     target.emit('kill');
-
     target.remove();
   };
 
