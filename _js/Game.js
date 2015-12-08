@@ -23,15 +23,18 @@ class Game {
     this.HEAD = 'head';
     this.bleep = new Audio('./assets/bleep.mp3');
     this.error = new Audio('./assets/error.mp3');
+    this.audio = new Audio('./assets/audio.mp3');
+    //this.audio.play();
+    this.audio.loop = true;
     this.lanes = [this.LEFT_HAND, this.RIHGT_HAND, this.LEFT_FOOT, this.RIGHT_FOOT, this.HEAD];
     this.targets = [
     {x: paper.view.center.x - 177, y: this.metrumY + 34},
     {x: paper.view.center.x + 177, y: this.metrumY + 34},
     {x: paper.view.center.x - 92, y: this.metrumY + 208},
     {x: paper.view.center.x + 92, y: this.metrumY + 208},
-    {x: paper.view.center.x, y: this.metrumY - 423}];
+    {x: paper.view.center.x + 60, y: this.metrumY - 420}];
 
-    this.starts = [{x: -40, y: 400}, {x: 1064, y: 400}, {x: -40, y: this.metrumY + 208}, {x: 1064, y: this.metrumY + 208}, {x: 1064, y: this.metrumY - 423}];
+    this.starts = [{x: -40, y: 400}, {x: 1064, y: 400}, {x: -40, y: this.metrumY + 208}, {x: 1064, y: this.metrumY + 208}, {x: 1064, y: this.metrumY - 420}];
 
 
 
@@ -61,6 +64,8 @@ class Game {
 
       this.gameLayer.visible = false;
       this.finalLayer.visible = true;
+      this.gameLayer.activate();
+      this.progressBar.setProgress(this.score * 2);
       this.setupControls();
 
       console.log(this.button);
@@ -120,6 +125,8 @@ class Game {
     });
 
     this.socket.on('headDown', () => {
+      createjs.Tween.get(this.head, {override: true}).to({rotation: 10}, 250, createjs.Ease.elasticOut).to({rotation: 0}, 400, createjs.Ease.elasticOut);
+
       this.checkHandHit(this.HEAD);
     });
 
@@ -164,6 +171,7 @@ class Game {
         this.bleep.currentTime = 0;
         this.bleep.play();
         this.score += 1;
+        this.gameLayer.activate();
         this.progressBar.setProgress(this.score * 2);
       }
     });
@@ -224,6 +232,7 @@ class Game {
     this.bg = project.importSVG(document.getElementById('bg'));
 
     this.head = project.importSVG(document.getElementById('head'));
+
     this.rightArm = project.importSVG(document.getElementById('arm'));
     this.leftArm = this.rightArm.clone();
     this.leftArm.scale(-1, 1);
@@ -240,6 +249,7 @@ class Game {
     this.headLane = this.leftHandLane.clone();
 
     this.head.position = new Point(paper.view.center.x, this.metrumY - 260);
+    this.head.pivot = new Point(paper.view.center.x, this.metrumY - 80);
     this.torso.position = new Point(paper.view.center.x, this.metrumY);
 
     this.leftLeg.position = new Point(paper.view.center.x - 40, this.metrumY + 150);
@@ -278,9 +288,7 @@ class Game {
     this.rightFootLane.opacity = 0.7;
     this.rightFootLane.insertAbove(this.bg);
 
-    this.headLane.position = new Point(paper.view.center.x + 394, this.metrumY - 423);
-    this.headLane.pivot = new Point(paper.view.center.x, this.metrumY - 423);
-    this.headLane.rotation = 0;
+    this.headLane.position = new Point(paper.view.center.x + 451, this.metrumY - 420);
     this.headLane.opacity = 0.7;
     this.headLane.insertAbove(this.bg);
 

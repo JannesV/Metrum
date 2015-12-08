@@ -12,7 +12,10 @@ const init = () => {
   paper.setup('gameContainer');
   new Game(socket);
   document.getElementById('gameContainer').addEventListener('click', fullScreen);
+
 };
+
+
 
 const fullScreen = () => {
   var el = document.getElementById('gameContainer');

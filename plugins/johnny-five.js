@@ -127,15 +127,30 @@ module.exports.register = (server, options, next) => {
         ballOverCheck('rightFootOver', rightFootLed);
       });
 
+      socket.on('headOver', () => {
+        ballOverCheck('headOver', headLed);
+      });
+
     });
 
 
     const ballOverCheck = (emit, target) => {
       if(!ballOver) {
         console.log(emit);
-        target.on();
+        target.blink(100);
+        board.wait(200, () => {
+          target.blink(75);
+        });
+        board.wait(200, () => {
+          target.blink(50);
+        });
+        board.wait(200, () => {
+          target.blink(30);
+        });
+
         ballOver = true;
         board.wait(850, () => {
+          target.stop();
           target.off();
           ballOver = false;
         });
