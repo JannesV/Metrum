@@ -24,7 +24,11 @@ class Game {
     this.bleep = new Audio('./assets/bleep.mp3');
     this.error = new Audio('./assets/error.mp3');
     this.audio = new Audio('./assets/audio.mp3');
-    //this.audio.play();
+    this.audio.addEventListener('ended', () => {
+      this.audio.currentTime = 0;
+      this.audio.play();
+    }, false);
+    this.audio.play();
     this.audio.loop = true;
     this.lanes = [this.LEFT_HAND, this.RIHGT_HAND, this.LEFT_FOOT, this.RIGHT_FOOT, this.HEAD];
     this.targets = [
@@ -68,7 +72,6 @@ class Game {
       this.progressBar.setProgress(this.score * 2);
       this.setupControls();
 
-      console.log(this.button);
       paper.view.draw();
     }
 
@@ -130,13 +133,28 @@ class Game {
       this.checkHandHit(this.HEAD);
     });
 
+    this.socket.on('stopDown', () => {
+      if (this.started === true) {
+        this.started = false;
+        this.gameLayer.visible = false;
+        this.introLayer.visible = true;
+        this.gameLayer.activate();
+        this.progressBar.setProgress(this.score * 2);
+        this.setupControls();
+
+        paper.view.draw();
+      }
+
+    });
+
     this.socket.on('startHold', () => {
       if (this.holdProgress === 4 && this.started === false) {
-        console.log('derp');
         this.started = true;
         this.introLayer.visible = false;
         this.finalLayer.visible = false;
         this.gameLayer.visible = true;
+        this.score = 0;
+        this.progressBar.setProgress(0);
         createjs.Tween.get(this.progress, {override: true}).to({strokeWidth: 0}, 250, createjs.Ease.easeOut);
         createjs.Tween.get(this.button.scaling, {override: true}).to({x: 0, y: 0}, 250, createjs.Ease.easeOut);
         createjs.Tween.get(this.buttonText, {override: true}).to({opacity: 0}, 150, createjs.Ease.easeOut);
